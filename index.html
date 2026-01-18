@@ -6,7 +6,8 @@
   <title>QR Code Generator</title>
 
   <!-- QR library (small + reliable) -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 
   <style>
     :root{
@@ -153,98 +154,113 @@
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    const elUrl = document.getElementById("url");
-    const elSize = document.getElementById("size");
-    const elEC = document.getElementById("ec");
-    const canvas = document.getElementById("qr");
-    const btnGen = document.getElementById("gen");
-    const btnDl = document.getElementById("download");
-    const btnCopy = document.getElementById("copy");
-    const btnClear = document.getElementById("clear");
-    const toast = document.getElementById("toast");
+ <script>
+  const elUrl = document.getElementById("url");
+  const elSize = document.getElementById("size");
+  const elEC = document.getElementById("ec");
+  const canvas = document.getElementById("qr");
+  const btnGen = document.getElementById("gen");
+  const btnDl = document.getElementById("download");
+  const btnCopy = document.getElementById("copy");
+  const btnClear = document.getElementById("clear");
+  const toast = document.getElementById("toast");
 
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add("show");
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=>toast.classList.remove("show"), 1600);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>toast.classList.remove("show"), 2000);
+  }
+
+  function normalizeInput(v){
+    return (v || "").trim();
+  }
+
+  function ensureLib(){
+    if (typeof window.QRCode === "undefined" || typeof window.QRCode.toCanvas !== "function") {
+      showToast("QR library failed to load. Check CDN / internet.");
+      console.error("QRCode library missing. window.QRCode =", window.QRCode);
+      return false;
+    }
+    return true;
+  }
+
+  async function renderQR(){
+    if (!ensureLib()) return;
+
+    const text = normalizeInput(elUrl.value);
+    const size = Math.max(128, Math.min(1024, parseInt(elSize.value || "360", 10)));
+    const ecLevel = elEC.value;
+
+    if(!text){
+      showToast("Paste a link first 🙂");
+      btnDl.disabled = true;
+      btnCopy.disabled = true;
+      return;
     }
 
-    function normalizeInput(v){
-      return (v || "").trim();
-    }
-
-    async function renderQR(){
-      const text = normalizeInput(elUrl.value);
-      const size = Math.max(128, Math.min(1024, parseInt(elSize.value || "360", 10)));
-      const ecLevel = elEC.value;
-
-      if(!text){
-        showToast("Paste a link first 🙂");
-        btnDl.disabled = true;
-        btnCopy.disabled = true;
-        return;
-      }
-
-      // Make canvas crisp on high DPI screens
+    try{
       const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.floor(size * dpr);
       canvas.height = Math.floor(size * dpr);
       canvas.style.width = size + "px";
       canvas.style.height = size + "px";
 
-      await QRCode.toCanvas(canvas, text, {
+      await window.QRCode.toCanvas(canvas, text, {
         errorCorrectionLevel: ecLevel,
         margin: 2,
         width: canvas.width,
-        color: {
-          dark: "#000000",
-          light: "#ffffff"
-        }
+        color: { dark: "#000000", light: "#ffffff" }
       });
 
       btnDl.disabled = false;
       btnCopy.disabled = false;
       showToast("QR generated ✅");
+    }catch(err){
+      console.error(err);
+      showToast("Failed to generate QR (see console)");
     }
+  }
 
-    function downloadPNG(){
-      const a = document.createElement("a");
-      a.download = "qr-code.png";
-      a.href = canvas.toDataURL("image/png");
-      a.click();
+  function downloadPNG(){
+    const a = document.createElement("a");
+    a.download = "qr-code.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  }
+
+  async function copyImage(){
+    try{
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      showToast("Copied to clipboard ✅");
+    }catch(e){
+      showToast("Copy not supported (or blocked) in this browser");
+      console.error(e);
     }
+  }
 
-    async function copyImage(){
-      try{
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        showToast("Copied to clipboard ✅");
-      }catch(e){
-        showToast("Copy not supported in this browser");
-      }
-    }
+  function clearAll(){
+    elUrl.value = "";
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    btnDl.disabled = true;
+    btnCopy.disabled = true;
+    showToast("Cleared");
+  }
 
-    function clearAll(){
-      elUrl.value = "";
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      btnDl.disabled = true;
-      btnCopy.disabled = true;
-      showToast("Cleared");
-    }
+  btnGen.addEventListener("click", renderQR);
+  btnDl.addEventListener("click", downloadPNG);
+  btnCopy.addEventListener("click", copyImage);
+  btnClear.addEventListener("click", clearAll);
 
-    btnGen.addEventListener("click", renderQR);
-    btnDl.addEventListener("click", downloadPNG);
-    btnCopy.addEventListener("click", copyImage);
-    btnClear.addEventListener("click", clearAll);
+  elUrl.addEventListener("keydown", (e)=>{ if(e.key==="Enter") renderQR(); });
 
-    // Generate on Enter
-    elUrl.addEventListener("keydown", (e)=>{ if(e.key==="Enter") renderQR(); });
+  // Let you know immediately if library loaded
+  window.addEventListener("load", () => {
+    if (ensureLib()) showToast("Ready ✅");
+  });
+</script>
 
-    // Optional: generate live as you type (uncomment if you want)
-    // elUrl.addEventListener("input", ()=>{ clearTimeout(window._t); window._t=setTimeout(renderQR, 250); });
-  </script>
 </body>
 </html>
