@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>QR Code Generator</title>
 
-  <!-- IMPORTANT: Put qrcode.min.js in the SAME folder as this index.html -->
+  <!-- Local library (must exist in the same repo folder) -->
   <script src="./qrcode.min.js"></script>
 
   <style>
@@ -21,11 +21,9 @@
       --accent1:#8b5cf6;
       --accent2:#0ea5e9;
       --accent3:#22c55e;
-      --ring: rgba(139,92,246,.35);
       --shadow: 0 30px 80px rgba(0,0,0,.55);
       --radius: 22px;
     }
-
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -42,16 +40,13 @@
       justify-content:center;
       padding:28px;
     }
-
     .shell{
       width:min(1050px, 100%);
       display:grid;
       grid-template-columns: 1.15fr .85fr;
       gap:18px;
     }
-    @media (max-width: 920px){
-      .shell{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 920px){ .shell{ grid-template-columns: 1fr; } }
 
     .card{
       border:1px solid var(--line);
@@ -62,7 +57,6 @@
       overflow:hidden;
       position:relative;
     }
-
     .card::before{
       content:"";
       position:absolute;
@@ -72,11 +66,7 @@
       opacity:.45;
       pointer-events:none;
     }
-
-    .inner{
-      position:relative;
-      padding:18px;
-    }
+    .inner{ position:relative; padding:18px; }
 
     .hero{
       display:flex;
@@ -85,29 +75,15 @@
       gap:12px;
       margin-bottom:12px;
     }
-    .title{
-      margin:0;
-      font-size:22px;
-      letter-spacing:.2px;
-      line-height:1.2;
-    }
-    .subtitle{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.45;
-    }
+    .title{ margin:0; font-size:22px; letter-spacing:.2px; line-height:1.2; }
+    .subtitle{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
+
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
       border:1px solid rgba(255,255,255,.16);
       background: rgba(0,0,0,.22);
-      color: var(--muted);
-      font-size:12px;
-      white-space:nowrap;
+      color: var(--muted); font-size:12px; white-space:nowrap;
     }
     .dot{
       width:8px; height:8px; border-radius:999px;
@@ -125,16 +101,9 @@
       gap:12px;
       margin-top:14px;
     }
-    @media (max-width: 600px){
-      .grid{ grid-template-columns:1fr; }
-    }
+    @media (max-width: 600px){ .grid{ grid-template-columns:1fr; } }
 
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin: 6px 0 8px;
-    }
+    label{ display:block; font-size:12px; color:var(--muted); margin: 6px 0 8px; }
 
     input, select{
       width:100%;
@@ -152,12 +121,7 @@
       transform: translateY(-1px);
     }
 
-    .btns{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
+    .btns{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
     button{
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
@@ -170,16 +134,12 @@
       user-select:none;
     }
     button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
-    button:active{ transform: translateY(0px); }
     button[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
 
     .primary{
       border-color: transparent;
       background: linear-gradient(120deg, rgba(139,92,246,.95), rgba(14,165,233,.85));
       box-shadow: 0 12px 30px rgba(139,92,246,.18);
-    }
-    .primary:hover{
-      background: linear-gradient(120deg, rgba(139,92,246,1), rgba(14,165,233,.95));
     }
 
     .note{
@@ -193,12 +153,7 @@
       line-height:1.45;
     }
 
-    /* QR side */
-    .qrWrap{
-      display:grid;
-      place-items:center;
-      min-height: 430px;
-    }
+    .qrWrap{ display:grid; place-items:center; min-height: 430px; }
     .qrPanel{
       width:min(380px, 100%);
       border-radius: 22px;
@@ -210,8 +165,7 @@
     }
     .qrPanel::before{
       content:"";
-      position:absolute;
-      inset:-2px;
+      position:absolute; inset:-2px;
       border-radius: 24px;
       background: linear-gradient(120deg, rgba(139,92,246,.35), rgba(14,165,233,.25), rgba(34,197,94,.20));
       filter: blur(18px);
@@ -228,15 +182,23 @@
       min-height: 320px;
     }
 
-    #qr{
-      display:grid;
-      place-items:center;
+    #qr{ display:grid; place-items:center; }
+    #qr img, #qr canvas{ display:block; max-width:100%; height:auto; }
+
+    .err{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.10);
+      color:#ffd2d2;
+      font-size:12px;
+      line-height:1.45;
+      display:none;
     }
 
     .toast{
-      position:fixed;
-      bottom:18px;
-      left:50%;
+      position:fixed; bottom:18px; left:50%;
       transform:translateX(-50%);
       padding:10px 12px;
       border-radius:14px;
@@ -250,33 +212,17 @@
       backdrop-filter: blur(10px);
     }
     .toast.show{ opacity:1; transform: translateX(-50%) translateY(-4px); }
-
-    .err{
-      margin-top:12px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(239,68,68,.35);
-      background: rgba(239,68,68,.10);
-      color:#ffd2d2;
-      font-size:12px;
-      line-height:1.45;
-      display:none;
-    }
-    .err a{ color:#fff; font-weight:800; }
   </style>
 </head>
 
 <body>
   <div class="shell">
-    <!-- Left: controls -->
     <div class="card">
       <div class="inner">
         <div class="hero">
           <div>
             <h1 class="title">QR Code Generator</h1>
-            <p class="subtitle">
-              Paste any link or text → generate a QR instantly. Works fully client-side (no tracking / no server).
-            </p>
+            <p class="subtitle">Paste any link or text → generate a QR instantly. Runs fully in your browser.</p>
           </div>
           <div class="badge">
             <span id="libDot" class="dot"></span>
@@ -285,9 +231,8 @@
         </div>
 
         <div id="errBox" class="err">
-          <b>QR library missing.</b><br/>
-          You must upload <code>qrcode.min.js</code> into the <b>same folder</b> as <code>index.html</code> in your GitHub repo.<br/>
-          Then open: <a id="selfJsLink" href="#" target="_blank" rel="noreferrer">qrcode.min.js test link</a>
+          <b>qrcode.min.js not loaded.</b><br>
+          Make sure <code>qrcode.min.js</code> is in the <b>same folder</b> as <code>index.html</code> in your repo.
         </div>
 
         <label for="url">Link / Text</label>
@@ -298,7 +243,6 @@
             <label for="size">Size (px)</label>
             <input id="size" type="number" min="160" max="900" value="360" />
           </div>
-
           <div>
             <label for="ec">Error correction</label>
             <select id="ec">
@@ -308,12 +252,10 @@
               <option value="H">H (30%)</option>
             </select>
           </div>
-
           <div>
             <label for="fg">QR color</label>
             <input id="fg" type="text" value="#000000" />
           </div>
-
           <div>
             <label for="bg">Background</label>
             <input id="bg" type="text" value="#ffffff" />
@@ -328,13 +270,11 @@
         </div>
 
         <div class="note">
-          <b>Tip:</b> If you want to put a logo in the middle later, set error correction to <b>H</b>.
-          If you paste “google.com”, the app will auto-fix it to “https://google.com”.
+          Tip: if you paste <b>google.com</b> it auto-fixes to <b>https://google.com</b>. Use <b>H</b> if you’ll add a logo later.
         </div>
       </div>
     </div>
 
-    <!-- Right: QR preview -->
     <div class="card qrWrap">
       <div class="inner" style="width:100%;">
         <div class="qrPanel">
@@ -365,7 +305,6 @@
     const libDot = document.getElementById("libDot");
     const libText = document.getElementById("libText");
     const errBox = document.getElementById("errBox");
-    const selfJsLink = document.getElementById("selfJsLink");
 
     function showToast(msg){
       toast.textContent = msg;
@@ -379,10 +318,8 @@
     function normalizeUrlLike(s){
       const t = normalizeInput(s);
       if (!t) return "";
-      // If it looks like a domain but no scheme, add https://
       const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(t);
       if (hasScheme) return t;
-      // avoid adding to things like "hello world"
       const looksLikeDomain = /^[\w.-]+\.[a-zA-Z]{2,}(\/.*)?$/.test(t);
       return looksLikeDomain ? ("https://" + t) : t;
     }
@@ -427,9 +364,7 @@
         return;
       }
 
-      const raw = elUrl.value;
-      const text = normalizeUrlLike(raw);
-
+      const text = normalizeUrlLike(elUrl.value);
       if(!text){
         showToast("Paste a link first 🙂");
         clearQR();
@@ -441,40 +376,32 @@
       const fg = normalizeInput(elFG.value) || "#000000";
       const bg = normalizeInput(elBG.value) || "#ffffff";
 
-      // Rebuild QR fresh (ensures sizing works)
       qrBox.innerHTML = "";
       qrBox.style.width = size + "px";
       qrBox.style.height = size + "px";
 
-      try{
-        new QRCode(qrBox, {
-          text,
-          width: size,
-          height: size,
-          colorDark: fg,
-          colorLight: bg,
-          correctLevel: ecToLevel(ec)
-        });
+      new QRCode(qrBox, {
+        text,
+        width: size,
+        height: size,
+        colorDark: fg,
+        colorLight: bg,
+        correctLevel: ecToLevel(ec)
+      });
 
-        btnDl.disabled = false;
-        btnCopy.disabled = false;
-        showToast("QR generated ✅");
-      }catch(e){
-        console.error(e);
-        showToast("Failed to generate (open Console)");
-      }
+      btnDl.disabled = false;
+      btnCopy.disabled = false;
+      showToast("QR generated ✅");
     }
 
-    function getQrCanvasOrImg(){
+    function getQrNode(){
       return qrBox.querySelector("canvas") || qrBox.querySelector("img");
     }
 
     function downloadPNG(){
-      const node = getQrCanvasOrImg();
+      const node = getQrNode();
       if(!node){ showToast("Generate a QR first"); return; }
-
       const dataUrl = (node.tagName === "CANVAS") ? node.toDataURL("image/png") : node.src;
-
       const a = document.createElement("a");
       a.download = "qr-code.png";
       a.href = dataUrl;
@@ -482,9 +409,8 @@
     }
 
     async function copyImage(){
-      const node = getQrCanvasOrImg();
+      const node = getQrNode();
       if(!node){ showToast("Generate a QR first"); return; }
-
       try{
         let blob;
         if(node.tagName === "CANVAS"){
@@ -507,18 +433,13 @@
       showToast("Cleared");
     }
 
-    // Events
     btnGen.addEventListener("click", renderQR);
     btnDl.addEventListener("click", downloadPNG);
     btnCopy.addEventListener("click", copyImage);
     btnClear.addEventListener("click", clearAll);
-
     elUrl.addEventListener("keydown", (e)=>{ if(e.key === "Enter") renderQR(); });
 
-    // Build “test link” to your hosted qrcode.min.js
     window.addEventListener("load", () => {
-      // This will point to: https://.../qrcode.min.js (same folder)
-      selfJsLink.href = new URL("./qrcode.min.js", window.location.href).toString();
       ensureLib();
       if (ensureLib()) showToast("Ready ✅");
     });
