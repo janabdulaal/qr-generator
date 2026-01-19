@@ -318,6 +318,89 @@
   max-width: 420px;
   margin: 0 auto;
 }
+/* =========================
+   MOBILE RESPONSIVENESS
+   ========================= */
+
+/* 1️⃣ Stack layout on tablets & phones */
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 2️⃣ Improve spacing & readability on phones */
+@media (max-width: 600px) {
+  body {
+    padding: 14px;
+  }
+
+  .inner {
+    padding: 14px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  /* Stack form fields */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Bigger tap targets */
+  input,
+  select,
+  button {
+    font-size: 16px; /* prevents iOS zoom */
+  }
+
+  /* Buttons: 2 per row */
+  .btns button {
+    flex: 1 1 calc(50% - 10px);
+  }
+}
+
+/* 3️⃣ Very small phones */
+@media (max-width: 380px) {
+  .btns button {
+    flex: 1 1 100%;
+  }
+}
+
+/* =========================
+   QR CONTAINER SAFETY
+   ========================= */
+
+/* Keep QR always inside white card */
+.qrPanelInner {
+  overflow: hidden;
+}
+
+/* QR scales correctly on mobile */
+#qr {
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+/* Prevent canvas/img overflow */
+#qr canvas,
+#qr img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Limit QR panel width on large screens */
+.qrPanel {
+  max-width: 420px;
+  margin: 0 auto;
+}
 
   </style>
 </head>
